@@ -101,6 +101,7 @@ input { font-family: inherit; }
 .nt-level-star-on { color: #E0A72B; }
 .nt-level-star-off { color: var(--border-strong); }
 .nt-level-lock { font-size: 18px; color: var(--text-muted); }
+.nt-level-history { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
 
 .nt-practice-card { background: var(--bg-primary); border: 0.5px solid var(--border-mid); border-radius: 12px; padding: 0.6rem 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .nt-practice-card .nt-p-text { font-size: 13px; color: var(--text-secondary); }
@@ -283,10 +284,11 @@ let ntScore=0, ntRound=0, ntStreak=0, ntAnswered=false, ntCurrentNote=null, ntTi
 
 function ntLoad() {
   try { const raw = localStorage.getItem('clefTrainerPlayers'); ntPlayers = raw ? JSON.parse(raw) : {}; } catch(e) { ntPlayers = {}; }
-  Object.values(ntPlayers).forEach(p => { if (!p.badges) p.badges = []; });
+  Object.values(ntPlayers).forEach(p => { if (!p.badges) p.badges = []; if (!p.history) p.history = {}; });
 }
 function ntSave() { try { localStorage.setItem('clefTrainerPlayers', JSON.stringify(ntPlayers)); } catch(e) {} }
 function ntDefaultProgress() { const p = {}; LEVELS.forEach(l => p[l.id] = 0); return p; }
+function ntTodayStr() { return new Date().toISOString().slice(0,10); }
 
 function ntRenderProfiles() {
   const grid = document.getElementById('nt-profile-grid');
@@ -333,7 +335,7 @@ function ntConfirmAdd() {
   const err = document.getElementById('nt-add-error');
   if (!name) { err.textContent = 'Enter a name first'; return; }
   if (ntPlayers[name]) { err.textContent = 'That name is already taken'; return; }
-  ntPlayers[name] = { avatar: ntPendingAvatar, progress: ntDefaultProgress(), badges: [] };
+  ntPlayers[name] = { avatar: ntPendingAvatar, progress: ntDefaultProgress(), badges: [], history: {} };
   ntSave();
   ntCancelAdd();
   ntRenderProfiles();
@@ -353,6 +355,18 @@ function ntStarsHtml(count) {
   return h;
 }
 
+function ntLevelHistorySummary(levelId) {
+  const hist = (ntPlayers[ntCurrentPlayer].history || {})[levelId];
+  if (!hist) return null;
+  const dates = Object.keys(hist).sort();
+  if (dates.length === 0) return null;
+  const total = dates.reduce((a,d) => a + hist[d], 0);
+  const lastDate = dates[dates.length-1];
+  const d = new Date(lastDate+'T00:00:00');
+  const lastStr = d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+  return { total, lastStr };
+}
+
 function ntRenderMap() {
   const grid = document.getElementById('nt-level-grid');
   grid.innerHTML = '';
@@ -363,7 +377,9 @@ function ntRenderMap() {
     const card = document.createElement('button');
     card.className = 'nt-level-card' + (unlocked ? '' : ' locked');
     if (unlocked) {
-      card.innerHTML = `<div class="nt-level-num">Level ${lvl.id}${lvl.timed ? ' ⏱' : ''}</div><div class="nt-level-title">${lvl.title}</div><div class="nt-level-sub">${lvl.sub}</div><div class="nt-level-stars">${ntStarsHtml(stars)}</div>`;
+      const hs = ntLevelHistorySummary(lvl.id);
+      const histLine = hs ? `<div class="nt-level-history">✓ ${hs.total}x played &middot; last ${hs.lastStr}</div>` : `<div class="nt-level-history">Not played yet</div>`;
+      card.innerHTML = `<div class="nt-level-num">Level ${lvl.id}${lvl.timed ? ' ⏱' : ''}</div><div class="nt-level-title">${lvl.title}</div><div class="nt-level-sub">${lvl.sub}</div><div class="nt-level-stars">${ntStarsHtml(stars)}</div>${histLine}`;
       card.onclick = () => ntStartLevel(lvl.id);
     } else {
       card.innerHTML = `<div class="nt-level-num">Level ${lvl.id}</div><div class="nt-level-title">${lvl.title}</div><div class="nt-level-lock">🔒</div>`;
@@ -492,6 +508,15 @@ function ntAwardBadge(id) {
   if (!badges.includes(id)) { badges.push(id); ntSave(); ntShowBadgeToast(id); }
 }
 
+function ntRecordCompletion(levelId) {
+  const player = ntPlayers[ntCurrentPlayer];
+  if (!player.history) player.history = {};
+  if (!player.history[levelId]) player.history[levelId] = {};
+  const today = ntTodayStr();
+  player.history[levelId][today] = (player.history[levelId][today] || 0) + 1;
+  ntSave();
+}
+
 function ntStartLevel(levelId) {
   ntMode = 'level';
   ntCurrentLevel = LEVELS.find(l => l.id === levelId);
@@ -599,6 +624,7 @@ function ntFinishLevel() {
   else if (ntScore >= 7) stars = 1;
   const progress = ntPlayers[ntCurrentPlayer].progress;
   if (stars > (progress[ntCurrentLevel.id] || 0)) { progress[ntCurrentLevel.id] = stars; ntSave(); }
+  ntRecordCompletion(ntCurrentLevel.id);
 
   if (stars >= 1) {
     ntAwardBadge('first_level');
