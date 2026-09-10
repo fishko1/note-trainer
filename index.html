@@ -89,6 +89,10 @@ input { font-family: inherit; }
 .nt-modal-actions { display: flex; gap: 8px; margin-top: 6px; }
 .nt-modal-actions button, .nt-practice-btns button { border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--bg-primary); padding: 9px; font-size: 13px; color: var(--text-primary); }
 
+.nt-review-banner { background: var(--amber-bg); color: var(--amber-text); border-radius: 12px; padding: 0.6rem 0.85rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.nt-review-banner strong { color: var(--amber-text); }
+.nt-review-banner button { font-size: 12px; padding: 6px 12px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); background: var(--bg-primary); color: var(--text-primary); }
+
 .nt-section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0.75rem 0 0.4rem; }
 
 .nt-level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 0.5rem 0 1rem; }
@@ -99,9 +103,11 @@ input { font-family: inherit; }
 .nt-level-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
 .nt-level-stars { font-size: 14px; letter-spacing: 2px; }
 .nt-level-star-on { color: #E0A72B; }
+.nt-level-star-faded { color: #c9b46b; opacity: 0.5; }
 .nt-level-star-off { color: var(--border-strong); }
 .nt-level-lock { font-size: 18px; color: var(--text-muted); }
 .nt-level-history { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+.nt-needs-review { font-size: 11px; color: var(--amber-text); font-weight: 600; margin-top: 2px; }
 
 .nt-practice-card { background: var(--bg-primary); border: 0.5px solid var(--border-mid); border-radius: 12px; padding: 0.6rem 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .nt-practice-card .nt-p-text { font-size: 13px; color: var(--text-secondary); }
@@ -186,6 +192,8 @@ input { font-family: inherit; }
       <button class="nt-linkbtn" onclick="ntShowScreen('profiles')">&larr; Switch player</button>
       <span class="nt-player-chip"><span id="nt-map-avatar"></span><span id="nt-map-name"></span></span>
     </div>
+
+    <div class="nt-review-banner hidden" id="nt-review-banner"></div>
 
     <div class="nt-section-title">Practice mode</div>
     <div class="nt-practice-card">
@@ -274,6 +282,7 @@ const KB_WHITES = ['E2','F2','G2','A2','B2','C3','D3','E3','F3','G3','A3','B3','
 const TOTAL_ROUNDS = 10;
 const NOTE_X = 310, STEM_LEN = 55;
 const TIMER_MS = 6000;
+const REVIEW_DAYS = 7;
 
 let ntPlayers = {};
 let ntCurrentPlayer = null;
@@ -349,9 +358,12 @@ function ntSelectPlayer(name) {
   ntShowScreen('map');
 }
 
-function ntStarsHtml(count) {
+function ntStarsHtml(count, faded) {
   let h = '';
-  for (let i=0;i<3;i++) h += `<span class="${i<count?'nt-level-star-on':'nt-level-star-off'}">★</span>`;
+  for (let i=0;i<3;i++) {
+    if (i < count) h += `<span class="${faded ? 'nt-level-star-faded' : 'nt-level-star-on'}">★</span>`;
+    else h += `<span class="nt-level-star-off">★</span>`;
+  }
   return h;
 }
 
@@ -364,7 +376,23 @@ function ntLevelHistorySummary(levelId) {
   const lastDate = dates[dates.length-1];
   const d = new Date(lastDate+'T00:00:00');
   const lastStr = d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
-  return { total, lastStr };
+  const today = new Date(ntTodayStr()+'T00:00:00');
+  const daysSince = Math.round((today - d) / 86400000);
+  return { total, lastStr, daysSince };
+}
+
+function ntFindMostOverdue() {
+  const progress = ntPlayers[ntCurrentPlayer].progress;
+  let best = null;
+  LEVELS.forEach(lvl => {
+    if ((progress[lvl.id] || 0) > 0) {
+      const hs = ntLevelHistorySummary(lvl.id);
+      if (hs && hs.daysSince >= REVIEW_DAYS) {
+        if (!best || hs.daysSince > best.days) best = { level: lvl, days: hs.daysSince };
+      }
+    }
+  });
+  return best;
 }
 
 function ntRenderMap() {
@@ -378,8 +406,10 @@ function ntRenderMap() {
     card.className = 'nt-level-card' + (unlocked ? '' : ' locked');
     if (unlocked) {
       const hs = ntLevelHistorySummary(lvl.id);
+      const faded = stars > 0 && hs && hs.daysSince >= REVIEW_DAYS;
       const histLine = hs ? `<div class="nt-level-history">✓ ${hs.total}x played &middot; last ${hs.lastStr}</div>` : `<div class="nt-level-history">Not played yet</div>`;
-      card.innerHTML = `<div class="nt-level-num">Level ${lvl.id}${lvl.timed ? ' ⏱' : ''}</div><div class="nt-level-title">${lvl.title}</div><div class="nt-level-sub">${lvl.sub}</div><div class="nt-level-stars">${ntStarsHtml(stars)}</div>${histLine}`;
+      const reviewTag = faded ? `<div class="nt-needs-review">Needs review</div>` : '';
+      card.innerHTML = `<div class="nt-level-num">Level ${lvl.id}${lvl.timed ? ' ⏱' : ''}</div><div class="nt-level-title">${lvl.title}</div><div class="nt-level-sub">${lvl.sub}</div><div class="nt-level-stars">${ntStarsHtml(stars, faded)}</div>${reviewTag}${histLine}`;
       card.onclick = () => ntStartLevel(lvl.id);
     } else {
       card.innerHTML = `<div class="nt-level-num">Level ${lvl.id}</div><div class="nt-level-title">${lvl.title}</div><div class="nt-level-lock">🔒</div>`;
@@ -399,6 +429,15 @@ function ntRenderMap() {
     el.innerHTML = `<span class="nt-b-icon">${b.icon}</span><span class="nt-b-label">${b.label}</span>`;
     badgeRow.appendChild(el);
   });
+
+  const banner = document.getElementById('nt-review-banner');
+  const overdue = ntFindMostOverdue();
+  if (overdue) {
+    banner.classList.remove('hidden');
+    banner.innerHTML = `<span>⏰ Time to review: <strong>${overdue.level.title}</strong> — ${overdue.days} days since last played</span><button onclick="ntStartLevel(${overdue.level.id})">Practice now</button>`;
+  } else {
+    banner.classList.add('hidden');
+  }
 }
 
 function ntShowScreen(name) {
