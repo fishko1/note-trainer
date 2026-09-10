@@ -118,10 +118,14 @@ input { font-family: inherit; }
 .nt-timer-wrap { height: 5px; background: var(--bg-tertiary); border-radius: 3px; margin-bottom: 0.5rem; overflow: hidden; }
 .nt-timer-fill { height: 5px; background: #E0A72B; border-radius: 3px; width: 100%; transition: width 0.1s linear; }
 
-.nt-staff-card { border: 0.5px solid var(--border-mid); border-radius: 12px; background: var(--bg-primary); padding: 0.4rem 0.5rem 0.5rem; margin-bottom: 0.5rem; }
+.nt-staff-card { border: 0.5px solid var(--border-mid); border-radius: 12px; background: var(--bg-primary); padding: 0.4rem 0.5rem 0.5rem; margin-bottom: 0.4rem; }
 .nt-staff-svg { width: 100%; display: block; max-height: 220px; }
 
 .nt-badge-toast { text-align: center; font-size: 13px; background: var(--amber-bg); color: var(--amber-text); border-radius: var(--radius-md); padding: 6px; margin-bottom: 0.5rem; }
+
+.nt-flash { text-align: center; font-size: 46px; font-weight: 700; min-height: 56px; line-height: 56px; opacity: 0; transition: opacity 0.15s ease; }
+.nt-flash.ok { opacity: 1; color: var(--green-border); }
+.nt-flash.bad { opacity: 1; color: #C97A12; }
 
 .nt-feedback { text-align: center; font-size: 13px; min-height: 20px; margin-bottom: 0.4rem; color: var(--text-secondary); }
 .nt-feedback.ok { color: var(--green-border); }
@@ -131,8 +135,10 @@ input { font-family: inherit; }
 .nt-keyboard-scroll { margin-bottom: 0.6rem; }
 .nt-keyboard { position: relative; height: 170px; width: 100%; }
 .nt-key-white { position: absolute; top: 0; height: 170px; background: #faf9f6; border: 0.5px solid #ccc; border-radius: 0 0 6px 6px; -webkit-tap-highlight-color: transparent; }
+.nt-key-white.nt-key-landmark { background: #f3ecd6; border-color: #d9c98a; }
 .nt-key-white.correct { background: #c8ecd9; border-color: #1D9E75; }
 .nt-key-white.wrong { background: #f6cfc2; border-color: #D85A30; }
+.nt-key-label { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 13px; font-weight: 700; color: #8a8064; pointer-events: none; }
 .nt-key-black { position: absolute; top: 0; height: 104px; background: #2a2a28; border-radius: 0 0 4px 4px; z-index: 2; pointer-events: none; }
 
 .nt-pills { display: flex; gap: 6px; justify-content: center; margin-bottom: 0.4rem; flex-wrap: wrap; }
@@ -206,6 +212,7 @@ input { font-family: inherit; }
     <div class="nt-progress-wrap" id="nt-progress-wrap"><div class="nt-progress-fill" id="nt-progress"></div></div>
     <div class="nt-timer-wrap hidden" id="nt-timer-wrap"><div class="nt-timer-fill" id="nt-timer"></div></div>
     <div class="nt-staff-card"><svg class="nt-staff-svg" id="nt-staff" viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="nt-flash" id="nt-flash"></div>
     <div class="nt-feedback" id="nt-feedback"></div>
     <div class="nt-keyboard-hint">Tap the matching key</div>
     <div class="nt-keyboard-scroll"><div class="nt-keyboard" id="nt-keyboard"></div></div>
@@ -444,10 +451,18 @@ function ntRenderKeyboard() {
   KB_WHITES.forEach((id, i) => {
     const key = document.createElement('button');
     key.className = 'nt-key-white';
+    const isLandmark = (id === 'C4' || i === 0 || i === KB_WHITES.length-1);
+    if (id === 'C4') key.classList.add('nt-key-landmark');
     key.style.left = (i*keyW) + 'px';
     key.style.width = keyW + 'px';
     key.dataset.noteId = id;
     key.onclick = () => ntHandleKeyPress(id, key);
+    if (isLandmark) {
+      const lbl = document.createElement('span');
+      lbl.className = 'nt-key-label';
+      lbl.textContent = id[0];
+      key.appendChild(lbl);
+    }
     wrap.appendChild(key);
   });
   const blackW = keyW * 0.62;
@@ -534,6 +549,9 @@ function ntHandleKeyPress(pressedId, keyEl) {
   const correctKey = document.querySelector(`.nt-key-white[data-note-id="${note.id}"]`);
   if (correctKey) correctKey.classList.add('correct');
   const fb = document.getElementById('nt-feedback');
+  const flash = document.getElementById('nt-flash');
+  flash.textContent = note.label;
+  flash.className = 'nt-flash ' + (correct ? 'ok' : 'bad');
   if (correct) {
     ntScore++; ntStreak++;
     fb.textContent = ntStreak >= 3 ? `Correct! ${ntStreak} in a row!` : 'Correct!';
@@ -564,6 +582,9 @@ function ntNextRound() {
   ntCurrentNote = noteObj(pick.id, pick.clef);
   document.getElementById('nt-feedback').textContent = '';
   document.getElementById('nt-feedback').className = 'nt-feedback';
+  const flash = document.getElementById('nt-flash');
+  flash.textContent = '';
+  flash.className = 'nt-flash';
   document.getElementById('nt-rnd').textContent = ntRound;
   ntDrawStaff(ntCurrentNote);
   ntRenderKeyboard();
