@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Note Trainer">
+<meta name="theme-color" content="#1a1a16">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>Clef Note Trainer</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f4f0;
+  --bg-tertiary: #eeedea;
+  --text-primary: #1a1a16;
+  --text-secondary: #6b6b63;
+  --text-muted: #9a9a90;
+  --border-light: rgba(0,0,0,0.12);
+  --border-mid: rgba(0,0,0,0.22);
+  --border-strong: rgba(0,0,0,0.35);
+  --green-bg: #E1F5EE;
+  --green-border: #1D9E75;
+  --green-text: #085041;
+  --green-bar: #1D9E75;
+  --red-bg: #FAECE7;
+  --red-border: #D85A30;
+  --red-text: #4A1B0C;
+  --amber-bg: #FAEEDA;
+  --amber-text: #854F0B;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1c1c1a;
+    --bg-secondary: #252522;
+    --bg-tertiary: #2e2e2b;
+    --text-primary: #e8e8e0;
+    --text-secondary: #8a8a80;
+    --text-muted: #6a6a62;
+    --border-light: rgba(255,255,255,0.10);
+    --border-mid: rgba(255,255,255,0.18);
+    --border-strong: rgba(255,255,255,0.28);
+    --green-bg: #0a2e22;
+    --green-border: #1D9E75;
+    --green-text: #9FE1CB;
+    --red-bg: #2e1208;
+    --red-border: #D85A30;
+    --red-text: #F5C4B3;
+    --amber-bg: #3a2a05;
+    --amber-text: #FAC775;
+  }
+}
+
+html, body { height: 100%; background: var(--bg-secondary); font-family: var(--font); color: var(--text-primary); -webkit-text-size-adjust: 100%; }
+button { cursor: pointer; font-family: inherit; }
+input { font-family: inherit; }
+.hidden { display: none !important; }
+
+.ntw { max-width: 680px; margin: 0 auto; padding: calc(1.2rem + env(safe-area-inset-top)) 1rem calc(1.5rem + env(safe-area-inset-bottom)); min-height: 100%; }
+
+.nt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.nt-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.nt-player-chip { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: 20px; padding: 4px 10px 4px 6px; }
+
+.nt-profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 1rem; }
+.nt-profile-card { background: var(--bg-primary); border: 0.5px solid var(--border-mid); border-radius: 12px; padding: 1rem 0.5rem; text-align: center; }
+.nt-profile-card .nt-avatar { font-size: 32px; display: block; margin-bottom: 6px; }
+.nt-profile-card .nt-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.nt-profile-card .nt-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.nt-profile-card.nt-add { border-style: dashed; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+
+.nt-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 50; }
+.nt-modal { background: var(--bg-primary); border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 300px; }
+.nt-modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--text-primary); }
+.nt-modal input[type=text] { width: 100%; padding: 8px 10px; border-radius: 8px; border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-primary); font-size: 15px; }
+.nt-avatar-picker { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 10px 0 14px; }
+.nt-avatar-opt { font-size: 22px; padding: 6px 0; border-radius: 8px; border: 0.5px solid var(--border-mid); background: var(--bg-secondary); text-align: center; }
+.nt-avatar-opt.sel { border: 2px solid var(--text-primary); }
+.nt-modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+.nt-modal-actions button, .nt-practice-btns button { border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--bg-primary); padding: 9px; font-size: 13px; color: var(--text-primary); }
+
+.nt-section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 1rem 0 0.5rem; }
+
+.nt-level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0.75rem 0 1.25rem; }
+.nt-level-card { border-radius: 12px; padding: 0.85rem; border: 0.5px solid var(--border-mid); background: var(--bg-primary); text-align: left; }
+.nt-level-card.locked { opacity: 0.5; }
+.nt-level-num { font-size: 11px; color: var(--text-muted); }
+.nt-level-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 2px 0; }
+.nt-level-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.nt-level-stars { font-size: 14px; letter-spacing: 2px; }
+.nt-level-star-on { color: #E0A72B; }
+.nt-level-star-off { color: var(--border-strong); }
+.nt-level-lock { font-size: 18px; color: var(--text-muted); }
+
+.nt-practice-card { background: var(--bg-primary); border: 0.5px solid var(--border-mid); border-radius: 12px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.nt-practice-card .nt-p-text { font-size: 13px; color: var(--text-secondary); }
+.nt-practice-btns { display: flex; gap: 6px; }
+.nt-practice-btns button { font-size: 13px; padding: 6px 12px; }
+
+.nt-badge-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.nt-badge { flex: 0 0 auto; width: 68px; text-align: center; border-radius: 10px; padding: 8px 4px; background: var(--bg-primary); border: 0.5px solid var(--border-mid); }
+.nt-badge.locked { opacity: 0.35; }
+.nt-badge .nt-b-icon { font-size: 22px; display: block; }
+.nt-badge .nt-b-label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+.nt-progress-wrap { height: 3px; background: var(--bg-tertiary); border-radius: 2px; margin-bottom: 1rem; overflow: hidden; }
+.nt-progress-fill { height: 3px; background: var(--green-bar); border-radius: 2px; width: 0%; transition: width 0.35s ease; }
+.nt-timer-wrap { height: 5px; background: var(--bg-tertiary); border-radius: 3px; margin-bottom: 0.75rem; overflow: hidden; }
+.nt-timer-fill { height: 5px; background: #E0A72B; border-radius: 3px; width: 100%; transition: width 0.1s linear; }
+
+.nt-staff-card { border: 0.5px solid var(--border-mid); border-radius: 12px; background: var(--bg-primary); padding: 0.5rem 0.75rem 0.75rem; margin-bottom: 0.5rem; }
+.nt-staff-svg { width: 100%; display: block; }
+
+.nt-badge-toast { text-align: center; font-size: 13px; background: var(--amber-bg); color: var(--amber-text); border-radius: var(--radius-md); padding: 6px; margin-bottom: 0.5rem; }
+
+.nt-feedback { text-align: center; font-size: 13px; min-height: 20px; margin-bottom: 0.5rem; color: var(--text-secondary); }
+.nt-feedback.ok { color: var(--green-border); }
+.nt-feedback.bad { color: var(--red-border); }
+
+.nt-keyboard-hint { text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.nt-keyboard-scroll { overflow-x: auto; margin-bottom: 0.75rem; -webkit-overflow-scrolling: touch; }
+.nt-keyboard { position: relative; height: 120px; }
+.nt-key-white { position: absolute; top: 0; height: 120px; background: #faf9f6; border: 0.5px solid #ccc; border-radius: 0 0 6px 6px; -webkit-tap-highlight-color: transparent; }
+.nt-key-white.correct { background: #c8ecd9; border-color: #1D9E75; }
+.nt-key-white.wrong { background: #f6cfc2; border-color: #D85A30; }
+.nt-key-black { position: absolute; top: 0; height: 74px; background: #2a2a28; border-radius: 0 0 4px 4px; z-index: 2; pointer-events: none; }
+
+.nt-pills { display: flex; gap: 6px; justify-content: center; margin-bottom: 0.5rem; flex-wrap: wrap; }
+.nt-pill { font-size: 12px; color: var(--text-secondary); background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: 20px; padding: 3px 10px; }
+.nt-pill strong { color: var(--text-primary); }
+
+.nt-backrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.nt-linkbtn { font-size: 13px; color: var(--text-secondary); background: none; border: none; padding: 4px 0; }
+
+.nt-complete { text-align: center; padding: 1.5rem 1rem; }
+.nt-complete .nt-stars-big { font-size: 34px; letter-spacing: 6px; margin-bottom: 6px; }
+.nt-complete h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
+.nt-complete p { font-size: 13px; color: var(--text-secondary); margin-bottom: 1.25rem; }
+.nt-complete-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.nt-complete-actions button { border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--bg-primary); padding: 9px 18px; font-size: 13px; color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="ntw" id="ntw">
+
+  <div id="nt-screen-profiles">
+    <div class="nt-header"><div class="nt-title">Clef note trainer</div></div>
+    <p style="font-size:13px; color: var(--text-secondary);">Who's playing?</p>
+    <div class="nt-profile-grid" id="nt-profile-grid"></div>
+  </div>
+
+  <div id="nt-screen-addmodal" class="hidden">
+    <div class="nt-modal-backdrop">
+      <div class="nt-modal">
+        <h3>New player</h3>
+        <input type="text" id="nt-new-name" placeholder="Name" maxlength="14" />
+        <div class="nt-avatar-picker" id="nt-avatar-picker"></div>
+        <div id="nt-add-error" style="font-size:13px; color: var(--red-border); min-height: 16px; margin-top: -6px; margin-bottom: 6px;"></div>
+        <div class="nt-modal-actions">
+          <button style="flex:1;" onclick="ntCancelAdd()">Cancel</button>
+          <button style="flex:1;" onclick="ntConfirmAdd()">Add player</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="nt-screen-map" class="hidden">
+    <div class="nt-backrow">
+      <button class="nt-linkbtn" onclick="ntShowScreen('profiles')">&larr; Switch player</button>
+      <span class="nt-player-chip"><span id="nt-map-avatar"></span><span id="nt-map-name"></span></span>
+    </div>
+
+    <div class="nt-section-title">Practice mode</div>
+    <div class="nt-practice-card">
+      <span class="nt-p-text">Free play, no pressure — pick a clef</span>
+      <div class="nt-practice-btns">
+        <button onclick="ntStartPractice('treble')">Treble</button>
+        <button onclick="ntStartPractice('bass')">Bass</button>
+        <button onclick="ntStartPractice('both')">Both</button>
+      </div>
+    </div>
+
+    <div class="nt-section-title">Levels</div>
+    <div class="nt-level-grid" id="nt-level-grid"></div>
+
+    <div class="nt-section-title">Badges</div>
+    <div class="nt-badge-row" id="nt-badge-row"></div>
+  </div>
+
+  <div id="nt-screen-game" class="hidden">
+    <div class="nt-backrow">
+      <button class="nt-linkbtn" onclick="ntExitGame()">&larr; Level map</button>
+      <div class="nt-pill">Score <strong id="nt-sc">0</strong></div>
+    </div>
+    <div id="nt-badge-toast" class="nt-badge-toast hidden"></div>
+    <div class="nt-progress-wrap" id="nt-progress-wrap"><div class="nt-progress-fill" id="nt-progress"></div></div>
+    <div class="nt-timer-wrap hidden" id="nt-timer-wrap"><div class="nt-timer-fill" id="nt-timer"></div></div>
+    <div class="nt-staff-card"><svg class="nt-staff-svg" id="nt-staff" viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="nt-feedback" id="nt-feedback"></div>
+    <div class="nt-keyboard-hint">Tap the matching key on the keyboard</div>
+    <div class="nt-keyboard-scroll"><div class="nt-keyboard" id="nt-keyboard"></div></div>
+    <div class="nt-pills">
+      <div class="nt-pill" id="nt-round-pill">Round <strong id="nt-rnd">1</strong><span id="nt-rnd-total">/10</span></div>
+      <div class="nt-pill">Streak <strong id="nt-stk">0</strong></div>
+    </div>
+    <div style="text-align:center;"><button class="nt-linkbtn hidden" id="nt-end-practice" onclick="ntEndPractice()">End practice</button></div>
+  </div>
+
+  <div id="nt-screen-complete" class="hidden">
+    <div class="nt-complete">
+      <div class="nt-stars-big" id="nt-stars-big"></div>
+      <h2 id="nt-c-title"></h2>
+      <p id="nt-c-detail"></p>
+      <div class="nt-complete-actions">
+        <button onclick="ntRetryLevel()">Retry</button>
+        <button id="nt-next-btn" onclick="ntNextLevel()">Next level</button>
+        <button onclick="ntShowScreen('map')">Level map</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const TREBLE_INFO = { 'C4':[130,[130]],'D4':[120,[]],'E4':[110,[]],'F4':[100,[]],'G4':[90,[]],'A4':[80,[]],'B4':[70,[]],'C5':[60,[]],'D5':[50,[]],'E5':[40,[]],'F5':[30,[]],'G5':[20,[]],'A5':[10,[10]] };
+const BASS_INFO   = { 'E2':[130,[130]],'F2':[120,[]],'G2':[110,[]],'A2':[100,[]],'B2':[90,[]],'C3':[80,[]],'D3':[70,[]],'E3':[60,[]],'F3':[50,[]],'G3':[40,[]],'A3':[30,[]],'B3':[20,[]],'C4':[10,[10]] };
+function noteObj(id, clef) { const info = (clef==='treble'?TREBLE_INFO:BASS_INFO)[id]; return { id, label:id[0], clef, y:info[0], ledger:info[1] }; }
+function poolFrom(ids, clef) { return ids.map(id => ({id, clef})); }
+const ALL_T = Object.keys(TREBLE_INFO), ALL_B = Object.keys(BASS_INFO);
+
+const LEVELS = [
+  { id:1, clef:'treble', title:'Treble lines', sub:'E G B D F', pool:poolFrom(['E4','G4','B4','D5','F5'],'treble') },
+  { id:2, clef:'treble', title:'Treble spaces', sub:'F A C E', pool:poolFrom(['F4','A4','C5','E5'],'treble') },
+  { id:3, clef:'treble', title:'Treble staff', sub:'All lines and spaces', pool:poolFrom(['E4','F4','G4','A4','B4','C5','D5','E5','F5'],'treble') },
+  { id:4, clef:'treble', title:'Treble + ledger', sub:'Middle C to high A', pool:poolFrom(ALL_T,'treble') },
+  { id:5, clef:'bass', title:'Bass lines', sub:'G B D F A', pool:poolFrom(['G2','B2','D3','F3','A3'],'bass') },
+  { id:6, clef:'bass', title:'Bass spaces', sub:'A C E G', pool:poolFrom(['A2','C3','E3','G3'],'bass') },
+  { id:7, clef:'bass', title:'Bass staff', sub:'All lines and spaces', pool:poolFrom(['G2','A2','B2','C3','D3','E3','F3','G3','A3'],'bass') },
+  { id:8, clef:'bass', title:'Bass + ledger', sub:'Low E to middle C', pool:poolFrom(ALL_B,'bass') },
+  { id:9, clef:'both', title:'Mixed clefs', sub:'Treble and bass together', pool:[...poolFrom(ALL_T,'treble'), ...poolFrom(ALL_B,'bass')] },
+  { id:10, clef:'both', title:'Speed challenge', sub:'Beat the clock', pool:[...poolFrom(ALL_T,'treble'), ...poolFrom(ALL_B,'bass')], timed:true },
+];
+
+const BADGES = [
+  { id:'first_level', icon:'🏅', label:'First win', desc:'Pass your first level' },
+  { id:'streak5', icon:'🔥', label:'On a roll', desc:'Get 5 in a row' },
+  { id:'streak10', icon:'⚡', label:'Unstoppable', desc:'Get 10 in a row' },
+  { id:'perfect3', icon:'🌟', label:'Perfectionist', desc:'3 stars on any level' },
+  { id:'treble_master', icon:'🎼', label:'Treble master', desc:'Pass all treble levels' },
+  { id:'bass_master', icon:'🎹', label:'Bass master', desc:'Pass all bass levels' },
+  { id:'all_clear', icon:'👑', label:'Note champion', desc:'Pass all 10 levels' },
+];
+
+const AVATARS = ['🦁','🐸','🐵','🦄','🐳','🐱','🐶','🦊','🐼','🐨'];
+const KB_WHITES = ['E2','F2','G2','A2','B2','C3','D3','E3','F3','G3','A3','B3','C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5','A5'];
+const TOTAL_ROUNDS = 10;
+const NOTE_X = 310, STEM_LEN = 55;
+const TIMER_MS = 6000;
+const KEY_W = 30;
+
+let ntPlayers = {};
+let ntCurrentPlayer = null;
+let ntPendingAvatar = AVATARS[0];
+let ntCurrentLevel = null;
+let ntMode = 'level';
+let ntScore=0, ntRound=0, ntStreak=0, ntAnswered=false, ntCurrentNote=null, ntTimerInterval=null;
+
+function ntLoad() {
+  try { const raw = localStorage.getItem('clefTrainerPlayers'); ntPlayers = raw ? JSON.parse(raw) : {}; } catch(e) { ntPlayers = {}; }
+  Object.values(ntPlayers).forEach(p => { if (!p.badges) p.badges = []; });
+}
+function ntSave() { try { localStorage.setItem('clefTrainerPlayers', JSON.stringify(ntPlayers)); } catch(e) {} }
+function ntDefaultProgress() { const p = {}; LEVELS.forEach(l => p[l.id] = 0); return p; }
+
+function ntRenderProfiles() {
+  const grid = document.getElementById('nt-profile-grid');
+  grid.innerHTML = '';
+  Object.keys(ntPlayers).forEach(name => {
+    const p = ntPlayers[name];
+    const total = Object.values(p.progress).reduce((a,b)=>a+b,0);
+    const card = document.createElement('button');
+    card.className = 'nt-profile-card';
+    card.innerHTML = `<span class="nt-avatar">${p.avatar}</span><span class="nt-name">${name}</span><span class="nt-meta">★ ${total}/30 &nbsp; 🏅${p.badges.length}</span>`;
+    card.onclick = () => ntSelectPlayer(name);
+    grid.appendChild(card);
+  });
+  const addCard = document.createElement('button');
+  addCard.className = 'nt-profile-card nt-add';
+  addCard.innerHTML = `<span style="font-size:22px;">+</span><span style="font-size:13px;">Add player</span>`;
+  addCard.onclick = ntOpenAdd;
+  grid.appendChild(addCard);
+}
+
+function ntOpenAdd() {
+  const picker = document.getElementById('nt-avatar-picker');
+  picker.innerHTML = '';
+  ntPendingAvatar = AVATARS[0];
+  AVATARS.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'nt-avatar-opt' + (a===ntPendingAvatar ? ' sel' : '');
+    b.textContent = a;
+    b.onclick = () => { ntPendingAvatar = a; picker.querySelectorAll('.nt-avatar-opt').forEach(el => el.classList.remove('sel')); b.classList.add('sel'); };
+    picker.appendChild(b);
+  });
+  document.getElementById('nt-new-name').value = '';
+  document.getElementById('nt-add-error').textContent = '';
+  document.getElementById('nt-screen-profiles').classList.add('hidden');
+  document.getElementById('nt-screen-addmodal').classList.remove('hidden');
+}
+function ntCancelAdd() {
+  document.getElementById('nt-screen-addmodal').classList.add('hidden');
+  document.getElementById('nt-screen-profiles').classList.remove('hidden');
+}
+function ntConfirmAdd() {
+  const nameInput = document.getElementById('nt-new-name');
+  const name = nameInput.value.trim();
+  const err = document.getElementById('nt-add-error');
+  if (!name) { err.textContent = 'Enter a name first'; return; }
+  if (ntPlayers[name]) { err.textContent = 'That name is already taken'; return; }
+  ntPlayers[name] = { avatar: ntPendingAvatar, progress: ntDefaultProgress(), badges: [] };
+  ntSave();
+  ntCancelAdd();
+  ntRenderProfiles();
+  ntSelectPlayer(name);
+}
+
+function ntSelectPlayer(name) {
+  ntCurrentPlayer = name;
+  document.getElementById('nt-map-avatar').textContent = ntPlayers[name].avatar;
+  document.getElementById('nt-map-name').textContent = name;
+  ntShowScreen('map');
+}
+
+function ntStarsHtml(count) {
+  let h = '';
+  for (let i=0;i<3;i++) h += `<span class="${i<count?'nt-level-star-on':'nt-level-star-off'}">★</span>`;
+  return h;
+}
+
+function ntRenderMap() {
+  const grid = document.getElementById('nt-level-grid');
+  grid.innerHTML = '';
+  const progress = ntPlayers[ntCurrentPlayer].progress;
+  LEVELS.forEach((lvl, idx) => {
+    const unlocked = idx === 0 || progress[LEVELS[idx-1].id] >= 1;
+    const stars = progress[lvl.id] || 0;
+    const card = document.createElement('button');
+    card.className = 'nt-level-card' + (unlocked ? '' : ' locked');
+    if (unlocked) {
+      card.innerHTML = `<div class="nt-level-num">Level ${lvl.id}${lvl.timed ? ' ⏱' : ''}</div><div class="nt-level-title">${lvl.title}</div><div class="nt-level-sub">${lvl.sub}</div><div class="nt-level-stars">${ntStarsHtml(stars)}</div>`;
+      card.onclick = () => ntStartLevel(lvl.id);
+    } else {
+      card.innerHTML = `<div class="nt-level-num">Level ${lvl.id}</div><div class="nt-level-title">${lvl.title}</div><div class="nt-level-lock">🔒</div>`;
+      card.disabled = true;
+    }
+    grid.appendChild(card);
+  });
+
+  const badgeRow = document.getElementById('nt-badge-row');
+  badgeRow.innerHTML = '';
+  const earned = ntPlayers[ntCurrentPlayer].badges;
+  BADGES.forEach(b => {
+    const has = earned.includes(b.id);
+    const el = document.createElement('div');
+    el.className = 'nt-badge' + (has ? '' : ' locked');
+    el.title = b.desc;
+    el.innerHTML = `<span class="nt-b-icon">${b.icon}</span><span class="nt-b-label">${b.label}</span>`;
+    badgeRow.appendChild(el);
+  });
+}
+
+function ntShowScreen(name) {
+  ['profiles','addmodal','map','game','complete'].forEach(s => {
+    document.getElementById('nt-screen-'+s).classList.toggle('hidden', s !== name);
+  });
+  if (ntTimerInterval) { clearInterval(ntTimerInterval); ntTimerInterval = null; }
+  if (name === 'profiles') ntRenderProfiles();
+  if (name === 'map') ntRenderMap();
+}
+
+function ntNoteFrequency(id) {
+  const letter = id[0], octave = parseInt(id.slice(1));
+  const semis = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  const midi = 12*(octave+1) + semis[letter];
+  return 440 * Math.pow(2, (midi-69)/12);
+}
+function ntPlayTone(freq, correct) {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = correct ? 'sine' : 'triangle';
+    o.frequency.value = freq;
+    const dur = 1.1;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime+0.03);
+    g.gain.setValueAtTime(0.2, ctx.currentTime+dur*0.55);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+dur+0.05);
+  } catch(e) {}
+}
+
+function ntColors() {
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return dark ? { line:'#666', note:'#e8e8e0', clef:'#aaa', ledger:'#777' }
+              : { line:'#999', note:'#1a1a16', clef:'#444', ledger:'#888' };
+}
+
+function ntDrawStaff(note) {
+  const svg = document.getElementById('nt-staff');
+  svg.innerHTML = '';
+  const c = ntColors(), ns = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs) { const e = document.createElementNS(ns,tag); Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v)); return e; }
+  [110,90,70,50,30].forEach(y => svg.appendChild(el('line',{x1:80,x2:480,y1:y,y2:y,stroke:c.line,'stroke-width':'1.2'})));
+  const clefText = document.createElementNS(ns,'text');
+  if (note.clef === 'treble') { clefText.setAttribute('x','82'); clefText.setAttribute('y','126'); clefText.setAttribute('font-size','95'); clefText.textContent = '\uD834\uDD1E'; }
+  else { clefText.setAttribute('x','82'); clefText.setAttribute('y','100'); clefText.setAttribute('font-size','72'); clefText.textContent = '\uD834\uDD22'; }
+  clefText.setAttribute('fill', c.clef); clefText.setAttribute('font-family','serif');
+  svg.appendChild(clefText);
+  note.ledger.forEach(ly => svg.appendChild(el('line',{x1:NOTE_X-20,x2:NOTE_X+20,y1:ly,y2:ly,stroke:c.ledger,'stroke-width':'1.5'})));
+  const noteY = note.y, stemUp = noteY > 80;
+  const stemX = stemUp ? NOTE_X+12 : NOTE_X-12;
+  const stemY2 = stemUp ? noteY-STEM_LEN : noteY+STEM_LEN;
+  svg.appendChild(el('ellipse',{cx:NOTE_X,cy:noteY,rx:'13',ry:'9',fill:c.note,transform:`rotate(-15,${NOTE_X},${noteY})`}));
+  svg.appendChild(el('line',{x1:stemX,x2:stemX,y1:noteY,y2:stemY2,stroke:c.note,'stroke-width':'1.8'}));
+}
+
+function ntRenderKeyboard() {
+  const wrap = document.getElementById('nt-keyboard');
+  wrap.innerHTML = '';
+  wrap.style.width = (KB_WHITES.length * KEY_W) + 'px';
+  KB_WHITES.forEach((id, i) => {
+    const key = document.createElement('button');
+    key.className = 'nt-key-white';
+    key.style.left = (i*KEY_W) + 'px';
+    key.style.width = KEY_W + 'px';
+    key.dataset.noteId = id;
+    key.onclick = () => ntHandleKeyPress(id, key);
+    wrap.appendChild(key);
+  });
+  KB_WHITES.forEach((id, i) => {
+    const letter = id[0];
+    if (letter !== 'E' && letter !== 'B' && i < KB_WHITES.length-1) {
+      const black = document.createElement('div');
+      black.className = 'nt-key-black';
+      black.style.left = ((i+1)*KEY_W - 9) + 'px';
+      black.style.width = '18px';
+      wrap.appendChild(black);
+    }
+  });
+  const scrollWrap = wrap.parentElement;
+  const c4Index = KB_WHITES.indexOf('C4');
+  setTimeout(() => {
+    scrollWrap.scrollLeft = Math.max(0, c4Index*KEY_W - scrollWrap.clientWidth/2);
+  }, 0);
+}
+
+function ntShowBadgeToast(badgeId) {
+  const b = BADGES.find(x => x.id === badgeId);
+  if (!b) return;
+  const toast = document.getElementById('nt-badge-toast');
+  toast.textContent = `${b.icon} Badge earned: ${b.label}!`;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 2400);
+}
+
+function ntAwardBadge(id) {
+  const badges = ntPlayers[ntCurrentPlayer].badges;
+  if (!badges.includes(id)) { badges.push(id); ntSave(); ntShowBadgeToast(id); }
+}
+
+function ntStartLevel(levelId) {
+  ntMode = 'level';
+  ntCurrentLevel = LEVELS.find(l => l.id === levelId);
+  ntScore = 0; ntRound = 0; ntStreak = 0; ntAnswered = false;
+  document.getElementById('nt-timer-wrap').classList.toggle('hidden', !ntCurrentLevel.timed);
+  document.getElementById('nt-progress-wrap').classList.remove('hidden');
+  document.getElementById('nt-rnd-total').textContent = '/' + TOTAL_ROUNDS;
+  document.getElementById('nt-end-practice').classList.add('hidden');
+  ntShowScreen('game');
+  document.getElementById('nt-sc').textContent = 0;
+  document.getElementById('nt-stk').textContent = 0;
+  document.getElementById('nt-progress').style.width = '0%';
+  ntNextRound();
+}
+
+function ntStartPractice(clef) {
+  ntMode = 'practice';
+  let pool;
+  if (clef === 'treble') pool = poolFrom(ALL_T,'treble');
+  else if (clef === 'bass') pool = poolFrom(ALL_B,'bass');
+  else pool = [...poolFrom(ALL_T,'treble'), ...poolFrom(ALL_B,'bass')];
+  ntCurrentLevel = { clef, pool, timed:false, practice:true };
+  ntScore = 0; ntRound = 0; ntStreak = 0; ntAnswered = false;
+  document.getElementById('nt-timer-wrap').classList.add('hidden');
+  document.getElementById('nt-progress-wrap').classList.add('hidden');
+  document.getElementById('nt-rnd-total').textContent = '';
+  document.getElementById('nt-end-practice').classList.remove('hidden');
+  ntShowScreen('game');
+  document.getElementById('nt-sc').textContent = 0;
+  document.getElementById('nt-stk').textContent = 0;
+  ntNextRound();
+}
+
+function ntExitGame() { ntShowScreen('map'); }
+function ntEndPractice() { ntShowScreen('map'); }
+
+function ntStartTimer() {
+  const fill = document.getElementById('nt-timer');
+  let elapsed = 0;
+  fill.style.width = '100%';
+  ntTimerInterval = setInterval(() => {
+    elapsed += 100;
+    const pct = Math.max(0, 100 - (elapsed/TIMER_MS*100));
+    fill.style.width = pct + '%';
+    if (elapsed >= TIMER_MS) { clearInterval(ntTimerInterval); ntTimerInterval = null; ntHandleKeyPress(null, null); }
+  }, 100);
+}
+
+function ntHandleKeyPress(pressedId, keyEl) {
+  if (ntAnswered) return;
+  ntAnswered = true;
+  if (ntTimerInterval) { clearInterval(ntTimerInterval); ntTimerInterval = null; }
+  const note = ntCurrentNote;
+  const correct = pressedId === note.id;
+  const correctKey = document.querySelector(`.nt-key-white[data-note-id="${note.id}"]`);
+  if (correctKey) correctKey.classList.add('correct');
+  const fb = document.getElementById('nt-feedback');
+  if (correct) {
+    ntScore++; ntStreak++;
+    fb.textContent = ntStreak >= 3 ? `Correct! ${ntStreak} in a row!` : 'Correct!';
+    fb.className = 'nt-feedback ok';
+    if (ntStreak === 5) ntAwardBadge('streak5');
+    if (ntStreak === 10) ntAwardBadge('streak10');
+  } else {
+    ntStreak = 0;
+    if (keyEl) keyEl.classList.add('wrong');
+    fb.textContent = pressedId === null ? `Time's up! That's ${note.label} (${note.id})` : `That's ${note.label} (${note.id})`;
+    fb.className = 'nt-feedback bad';
+  }
+  document.getElementById('nt-sc').textContent = ntScore;
+  document.getElementById('nt-stk').textContent = ntStreak;
+  ntPlayTone(ntNoteFrequency(note.id), correct);
+  setTimeout(ntNextRound, 1900);
+}
+
+function ntNextRound() {
+  ntRound++;
+  if (ntMode === 'level') {
+    document.getElementById('nt-progress').style.width = (ntRound-1)/TOTAL_ROUNDS*100 + '%';
+    if (ntRound > TOTAL_ROUNDS) { ntFinishLevel(); return; }
+  }
+  ntAnswered = false;
+  const pool = ntCurrentLevel.pool;
+  const pick = pool[Math.floor(Math.random()*pool.length)];
+  ntCurrentNote = noteObj(pick.id, pick.clef);
+  document.getElementById('nt-feedback').textContent = '';
+  document.getElementById('nt-feedback').className = 'nt-feedback';
+  document.getElementById('nt-rnd').textContent = ntRound;
+  ntDrawStaff(ntCurrentNote);
+  ntRenderKeyboard();
+  if (ntCurrentLevel.timed) ntStartTimer();
+}
+
+function ntFinishLevel() {
+  document.getElementById('nt-progress').style.width = '100%';
+  let stars = 0;
+  if (ntScore >= 10) stars = 3;
+  else if (ntScore >= 9) stars = 2;
+  else if (ntScore >= 7) stars = 1;
+  const progress = ntPlayers[ntCurrentPlayer].progress;
+  if (stars > (progress[ntCurrentLevel.id] || 0)) { progress[ntCurrentLevel.id] = stars; ntSave(); }
+
+  if (stars >= 1) {
+    ntAwardBadge('first_level');
+    if (LEVELS.slice(0,4).every(l => progress[l.id] >= 1)) ntAwardBadge('treble_master');
+    if (LEVELS.slice(4,8).every(l => progress[l.id] >= 1)) ntAwardBadge('bass_master');
+    if (LEVELS.every(l => progress[l.id] >= 1)) ntAwardBadge('all_clear');
+  }
+  if (stars === 3) ntAwardBadge('perfect3');
+
+  document.getElementById('nt-stars-big').innerHTML = ntStarsHtml(stars);
+  let title = stars === 3 ? 'Perfect!' : stars === 2 ? 'Great job!' : stars === 1 ? 'Level passed' : 'So close!';
+  document.getElementById('nt-c-title').textContent = title;
+  document.getElementById('nt-c-detail').textContent = `${ntScore} / ${TOTAL_ROUNDS} correct`;
+  const nextIdx = LEVELS.findIndex(l => l.id === ntCurrentLevel.id) + 1;
+  const nextBtn = document.getElementById('nt-next-btn');
+  if (stars >= 1 && nextIdx < LEVELS.length) { nextBtn.classList.remove('hidden'); nextBtn.textContent = 'Next level'; }
+  else nextBtn.classList.add('hidden');
+  ntShowScreen('complete');
+}
+
+function ntRetryLevel() { ntStartLevel(ntCurrentLevel.id); }
+function ntNextLevel() {
+  const idx = LEVELS.findIndex(l => l.id === ntCurrentLevel.id) + 1;
+  if (idx < LEVELS.length) ntStartLevel(LEVELS[idx].id);
+}
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if (ntCurrentNote && !document.getElementById('nt-screen-game').classList.contains('hidden')) ntDrawStaff(ntCurrentNote);
+});
+
+ntLoad();
+ntRenderProfiles();
+ntShowScreen('profiles');
+</script>
+</body>
+</html>
