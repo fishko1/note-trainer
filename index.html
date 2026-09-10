@@ -66,13 +66,13 @@ button { cursor: pointer; font-family: inherit; }
 input { font-family: inherit; }
 .hidden { display: none !important; }
 
-.ntw { max-width: 680px; margin: 0 auto; padding: calc(1.2rem + env(safe-area-inset-top)) 1rem calc(1.5rem + env(safe-area-inset-bottom)); min-height: 100%; }
+.ntw { max-width: 1100px; margin: 0 auto; padding: calc(0.6rem + env(safe-area-inset-top)) calc(0.5rem + env(safe-area-inset-left)) calc(0.8rem + env(safe-area-inset-bottom)) calc(0.5rem + env(safe-area-inset-right)); min-height: 100%; }
 
-.nt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.nt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
 .nt-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
 .nt-player-chip { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: 20px; padding: 4px 10px 4px 6px; }
 
-.nt-profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 1rem; }
+.nt-profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 0.75rem; }
 .nt-profile-card { background: var(--bg-primary); border: 0.5px solid var(--border-mid); border-radius: 12px; padding: 1rem 0.5rem; text-align: center; }
 .nt-profile-card .nt-avatar { font-size: 32px; display: block; margin-bottom: 6px; }
 .nt-profile-card .nt-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
@@ -89,60 +89,60 @@ input { font-family: inherit; }
 .nt-modal-actions { display: flex; gap: 8px; margin-top: 6px; }
 .nt-modal-actions button, .nt-practice-btns button { border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--bg-primary); padding: 9px; font-size: 13px; color: var(--text-primary); }
 
-.nt-section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 1rem 0 0.5rem; }
+.nt-section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0.75rem 0 0.4rem; }
 
-.nt-level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0.75rem 0 1.25rem; }
-.nt-level-card { border-radius: 12px; padding: 0.85rem; border: 0.5px solid var(--border-mid); background: var(--bg-primary); text-align: left; }
+.nt-level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 0.5rem 0 1rem; }
+.nt-level-card { border-radius: 12px; padding: 0.65rem 0.75rem; border: 0.5px solid var(--border-mid); background: var(--bg-primary); text-align: left; }
 .nt-level-card.locked { opacity: 0.5; }
 .nt-level-num { font-size: 11px; color: var(--text-muted); }
 .nt-level-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 2px 0; }
-.nt-level-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.nt-level-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
 .nt-level-stars { font-size: 14px; letter-spacing: 2px; }
 .nt-level-star-on { color: #E0A72B; }
 .nt-level-star-off { color: var(--border-strong); }
 .nt-level-lock { font-size: 18px; color: var(--text-muted); }
 
-.nt-practice-card { background: var(--bg-primary); border: 0.5px solid var(--border-mid); border-radius: 12px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.nt-practice-card { background: var(--bg-primary); border: 0.5px solid var(--border-mid); border-radius: 12px; padding: 0.6rem 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .nt-practice-card .nt-p-text { font-size: 13px; color: var(--text-secondary); }
 .nt-practice-btns { display: flex; gap: 6px; }
 .nt-practice-btns button { font-size: 13px; padding: 6px 12px; }
 
 .nt-badge-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-.nt-badge { flex: 0 0 auto; width: 68px; text-align: center; border-radius: 10px; padding: 8px 4px; background: var(--bg-primary); border: 0.5px solid var(--border-mid); }
+.nt-badge { flex: 0 0 auto; width: 64px; text-align: center; border-radius: 10px; padding: 6px 4px; background: var(--bg-primary); border: 0.5px solid var(--border-mid); }
 .nt-badge.locked { opacity: 0.35; }
-.nt-badge .nt-b-icon { font-size: 22px; display: block; }
+.nt-badge .nt-b-icon { font-size: 20px; display: block; }
 .nt-badge .nt-b-label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
 
-.nt-progress-wrap { height: 3px; background: var(--bg-tertiary); border-radius: 2px; margin-bottom: 1rem; overflow: hidden; }
+.nt-progress-wrap { height: 3px; background: var(--bg-tertiary); border-radius: 2px; margin-bottom: 0.75rem; overflow: hidden; }
 .nt-progress-fill { height: 3px; background: var(--green-bar); border-radius: 2px; width: 0%; transition: width 0.35s ease; }
-.nt-timer-wrap { height: 5px; background: var(--bg-tertiary); border-radius: 3px; margin-bottom: 0.75rem; overflow: hidden; }
+.nt-timer-wrap { height: 5px; background: var(--bg-tertiary); border-radius: 3px; margin-bottom: 0.5rem; overflow: hidden; }
 .nt-timer-fill { height: 5px; background: #E0A72B; border-radius: 3px; width: 100%; transition: width 0.1s linear; }
 
-.nt-staff-card { border: 0.5px solid var(--border-mid); border-radius: 12px; background: var(--bg-primary); padding: 0.5rem 0.75rem 0.75rem; margin-bottom: 0.5rem; }
-.nt-staff-svg { width: 100%; display: block; }
+.nt-staff-card { border: 0.5px solid var(--border-mid); border-radius: 12px; background: var(--bg-primary); padding: 0.4rem 0.5rem 0.5rem; margin-bottom: 0.5rem; }
+.nt-staff-svg { width: 100%; display: block; max-height: 220px; }
 
 .nt-badge-toast { text-align: center; font-size: 13px; background: var(--amber-bg); color: var(--amber-text); border-radius: var(--radius-md); padding: 6px; margin-bottom: 0.5rem; }
 
-.nt-feedback { text-align: center; font-size: 13px; min-height: 20px; margin-bottom: 0.5rem; color: var(--text-secondary); }
+.nt-feedback { text-align: center; font-size: 13px; min-height: 20px; margin-bottom: 0.4rem; color: var(--text-secondary); }
 .nt-feedback.ok { color: var(--green-border); }
 .nt-feedback.bad { color: var(--red-border); }
 
 .nt-keyboard-hint { text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-.nt-keyboard-scroll { overflow-x: auto; margin-bottom: 0.75rem; -webkit-overflow-scrolling: touch; }
-.nt-keyboard { position: relative; height: 120px; }
-.nt-key-white { position: absolute; top: 0; height: 120px; background: #faf9f6; border: 0.5px solid #ccc; border-radius: 0 0 6px 6px; -webkit-tap-highlight-color: transparent; }
+.nt-keyboard-scroll { margin-bottom: 0.6rem; }
+.nt-keyboard { position: relative; height: 170px; width: 100%; }
+.nt-key-white { position: absolute; top: 0; height: 170px; background: #faf9f6; border: 0.5px solid #ccc; border-radius: 0 0 6px 6px; -webkit-tap-highlight-color: transparent; }
 .nt-key-white.correct { background: #c8ecd9; border-color: #1D9E75; }
 .nt-key-white.wrong { background: #f6cfc2; border-color: #D85A30; }
-.nt-key-black { position: absolute; top: 0; height: 74px; background: #2a2a28; border-radius: 0 0 4px 4px; z-index: 2; pointer-events: none; }
+.nt-key-black { position: absolute; top: 0; height: 104px; background: #2a2a28; border-radius: 0 0 4px 4px; z-index: 2; pointer-events: none; }
 
-.nt-pills { display: flex; gap: 6px; justify-content: center; margin-bottom: 0.5rem; flex-wrap: wrap; }
+.nt-pills { display: flex; gap: 6px; justify-content: center; margin-bottom: 0.4rem; flex-wrap: wrap; }
 .nt-pill { font-size: 12px; color: var(--text-secondary); background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: 20px; padding: 3px 10px; }
 .nt-pill strong { color: var(--text-primary); }
 
-.nt-backrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.nt-backrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 .nt-linkbtn { font-size: 13px; color: var(--text-secondary); background: none; border: none; padding: 4px 0; }
 
-.nt-complete { text-align: center; padding: 1.5rem 1rem; }
+.nt-complete { text-align: center; padding: 1.25rem 1rem; }
 .nt-complete .nt-stars-big { font-size: 34px; letter-spacing: 6px; margin-bottom: 6px; }
 .nt-complete h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
 .nt-complete p { font-size: 13px; color: var(--text-secondary); margin-bottom: 1.25rem; }
@@ -207,7 +207,7 @@ input { font-family: inherit; }
     <div class="nt-timer-wrap hidden" id="nt-timer-wrap"><div class="nt-timer-fill" id="nt-timer"></div></div>
     <div class="nt-staff-card"><svg class="nt-staff-svg" id="nt-staff" viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg"></svg></div>
     <div class="nt-feedback" id="nt-feedback"></div>
-    <div class="nt-keyboard-hint">Tap the matching key on the keyboard</div>
+    <div class="nt-keyboard-hint">Tap the matching key</div>
     <div class="nt-keyboard-scroll"><div class="nt-keyboard" id="nt-keyboard"></div></div>
     <div class="nt-pills">
       <div class="nt-pill" id="nt-round-pill">Round <strong id="nt-rnd">1</strong><span id="nt-rnd-total">/10</span></div>
@@ -266,7 +266,6 @@ const KB_WHITES = ['E2','F2','G2','A2','B2','C3','D3','E3','F3','G3','A3','B3','
 const TOTAL_ROUNDS = 10;
 const NOTE_X = 310, STEM_LEN = 55;
 const TIMER_MS = 6000;
-const KEY_W = 30;
 
 let ntPlayers = {};
 let ntCurrentPlayer = null;
@@ -436,33 +435,32 @@ function ntDrawStaff(note) {
 }
 
 function ntRenderKeyboard() {
+  const scrollWrap = document.querySelector('.nt-keyboard-scroll');
   const wrap = document.getElementById('nt-keyboard');
   wrap.innerHTML = '';
-  wrap.style.width = (KB_WHITES.length * KEY_W) + 'px';
+  const availWidth = scrollWrap.clientWidth || 600;
+  const keyW = availWidth / KB_WHITES.length;
+  wrap.style.width = availWidth + 'px';
   KB_WHITES.forEach((id, i) => {
     const key = document.createElement('button');
     key.className = 'nt-key-white';
-    key.style.left = (i*KEY_W) + 'px';
-    key.style.width = KEY_W + 'px';
+    key.style.left = (i*keyW) + 'px';
+    key.style.width = keyW + 'px';
     key.dataset.noteId = id;
     key.onclick = () => ntHandleKeyPress(id, key);
     wrap.appendChild(key);
   });
+  const blackW = keyW * 0.62;
   KB_WHITES.forEach((id, i) => {
     const letter = id[0];
     if (letter !== 'E' && letter !== 'B' && i < KB_WHITES.length-1) {
       const black = document.createElement('div');
       black.className = 'nt-key-black';
-      black.style.left = ((i+1)*KEY_W - 9) + 'px';
-      black.style.width = '18px';
+      black.style.left = ((i+1)*keyW - blackW/2) + 'px';
+      black.style.width = blackW + 'px';
       wrap.appendChild(black);
     }
   });
-  const scrollWrap = wrap.parentElement;
-  const c4Index = KB_WHITES.indexOf('C4');
-  setTimeout(() => {
-    scrollWrap.scrollLeft = Math.max(0, c4Index*KEY_W - scrollWrap.clientWidth/2);
-  }, 0);
 }
 
 function ntShowBadgeToast(badgeId) {
@@ -606,6 +604,9 @@ function ntNextLevel() {
   if (idx < LEVELS.length) ntStartLevel(LEVELS[idx].id);
 }
 
+window.addEventListener('resize', () => {
+  if (ntCurrentNote && !document.getElementById('nt-screen-game').classList.contains('hidden')) ntRenderKeyboard();
+});
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   if (ntCurrentNote && !document.getElementById('nt-screen-game').classList.contains('hidden')) ntDrawStaff(ntCurrentNote);
 });
